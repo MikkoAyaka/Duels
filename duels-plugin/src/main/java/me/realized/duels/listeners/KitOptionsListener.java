@@ -14,6 +14,7 @@ import me.realized.duels.util.compat.Items;
 import me.realized.duels.util.metadata.MetadataUtil;
 import org.bukkit.Bukkit;
 import org.bukkit.Material;
+import org.bukkit.attribute.Attribute;
 import org.bukkit.block.Block;
 import org.bukkit.entity.Player;
 import org.bukkit.event.Event.Result;
@@ -27,6 +28,8 @@ import org.bukkit.event.player.PlayerInteractEvent;
 import org.bukkit.event.player.PlayerMoveEvent;
 import org.bukkit.inventory.EquipmentSlot;
 import org.bukkit.inventory.ItemStack;
+
+import java.util.Objects;
 
 /**
  * Applies kit characteristics (options) to duels.
@@ -44,6 +47,7 @@ public class KitOptionsListener implements Listener {
         this.config = plugin.getConfiguration();
         this.arenaManager = plugin.getArenaManager();
 
+        Bukkit.getPluginManager().registerEvents(new UHCListener(),plugin);
         Bukkit.getPluginManager().registerEvents(this, plugin);
         Bukkit.getPluginManager().registerEvents(CompatUtil.isPre1_14() ? new ComboPre1_14Listener() : new ComboPost1_14Listener(), plugin);
     }
@@ -145,7 +149,18 @@ public class KitOptionsListener implements Listener {
 
         event.setCancelled(true);
     }
-
+    private class UHCListener implements Listener {
+        @EventHandler
+        void on(MatchStartEvent event) {
+            final ArenaImpl arena = arenaManager.get(event.getMatch().getArena().getName());
+            if(arena == null) return;
+            if(!isEnabled(arena,Characteristic.UHC)) return;
+            for (final Player player : event.getPlayers()) {
+                Objects.requireNonNull(player.getAttribute(Attribute.GENERIC_MAX_HEALTH)).setBaseValue(40.0);
+                player.setHealth(40.0);
+            }
+        }
+    }
     private class ComboPre1_14Listener implements Listener {
 
         @EventHandler
