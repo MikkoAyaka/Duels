@@ -4,6 +4,7 @@ import java.util.Collection;
 import java.util.List;
 import java.util.stream.Collectors;
 import me.realized.duels.DuelsPlugin;
+import me.realized.duels.api.queue.ui.QueueUIManager;
 import me.realized.duels.arena.ArenaManagerImpl;
 import me.realized.duels.betting.BettingManager;
 import me.realized.duels.config.Config;
@@ -16,6 +17,7 @@ import me.realized.duels.kit.KitManagerImpl;
 import me.realized.duels.player.PlayerInfoManager;
 import me.realized.duels.queue.QueueManager;
 import me.realized.duels.queue.sign.QueueSignManagerImpl;
+import me.realized.duels.queue.ui.QueueUIManagerImpl;
 import me.realized.duels.request.RequestManager;
 import me.realized.duels.setting.SettingsManager;
 import me.realized.duels.spectate.SpectateManagerImpl;
@@ -40,6 +42,7 @@ public abstract class BaseCommand extends AbstractCommand<DuelsPlugin> {
     protected final DuelManager duelManager;
     protected final RequestManager requestManager;
     protected final HookManager hookManager;
+    protected final QueueUIManagerImpl queueUIManager;
 
     /**
      * Constructor for a sub command
@@ -63,6 +66,7 @@ public abstract class BaseCommand extends AbstractCommand<DuelsPlugin> {
         this.duelManager = plugin.getDuelManager();
         this.requestManager = plugin.getRequestManager();
         this.hookManager = plugin.getHookManager();
+        this.queueUIManager = plugin.getQueueUIManager();
     }
 
     /**

@@ -12,6 +12,7 @@ import java.util.stream.Collectors;
 import lombok.Getter;
 import me.realized.duels.api.Duels;
 import me.realized.duels.api.command.SubCommand;
+import me.realized.duels.api.queue.ui.QueueUIManager;
 import me.realized.duels.arena.ArenaManagerImpl;
 import me.realized.duels.betting.BettingManager;
 import me.realized.duels.command.commands.SpectateCommand;
@@ -41,6 +42,7 @@ import me.realized.duels.logging.LogManager;
 import me.realized.duels.player.PlayerInfoManager;
 import me.realized.duels.queue.QueueManager;
 import me.realized.duels.queue.sign.QueueSignManagerImpl;
+import me.realized.duels.queue.ui.QueueUIManagerImpl;
 import me.realized.duels.request.RequestManager;
 import me.realized.duels.setting.SettingsManager;
 import me.realized.duels.shaded.bstats.Metrics;
@@ -112,6 +114,8 @@ public class DuelsPlugin extends JavaPlugin implements Duels, LogSource {
     private Teleport teleport;
     @Getter
     private ExtensionManager extensionManager;
+    @Getter
+    private QueueUIManagerImpl queueUIManager;
 
     private final Map<String, AbstractCommand<DuelsPlugin>> commands = new HashMap<>();
     private final List<Listener> registeredListeners = new ArrayList<>();
@@ -171,7 +175,7 @@ public class DuelsPlugin extends JavaPlugin implements Duels, LogSource {
         hookManager = new HookManager(this);
         loadables.add(teleport = new Teleport(this));
         loadables.add(extensionManager = new ExtensionManager(this));
-
+        queueUIManager = new QueueUIManagerImpl(this);
         if (!load()) {
             getPluginLoader().disablePlugin(this);
             return;

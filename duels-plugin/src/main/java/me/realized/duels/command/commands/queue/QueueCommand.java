@@ -5,6 +5,7 @@ import me.realized.duels.Permissions;
 import me.realized.duels.command.BaseCommand;
 import me.realized.duels.command.commands.queue.subcommands.JoinCommand;
 import me.realized.duels.command.commands.queue.subcommands.LeaveCommand;
+import me.realized.duels.command.commands.queue.subcommands.UICommand;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 
@@ -14,7 +15,8 @@ public class QueueCommand extends BaseCommand {
         super(plugin, "queue", Permissions.QUEUE, true);
         child(
             new JoinCommand(plugin),
-            new LeaveCommand(plugin)
+            new LeaveCommand(plugin),
+            new UICommand(plugin)
         );
     }
 
