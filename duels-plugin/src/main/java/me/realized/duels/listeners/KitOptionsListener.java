@@ -16,6 +16,7 @@ import org.bukkit.Bukkit;
 import org.bukkit.Material;
 import org.bukkit.attribute.Attribute;
 import org.bukkit.block.Block;
+import org.bukkit.entity.EntityType;
 import org.bukkit.entity.Player;
 import org.bukkit.event.Event.Result;
 import org.bukkit.event.EventHandler;
@@ -24,12 +25,15 @@ import org.bukkit.event.entity.EntityDamageByEntityEvent;
 import org.bukkit.event.entity.EntityDamageEvent;
 import org.bukkit.event.entity.EntityRegainHealthEvent;
 import org.bukkit.event.entity.EntityRegainHealthEvent.RegainReason;
+import org.bukkit.event.entity.FoodLevelChangeEvent;
 import org.bukkit.event.player.PlayerInteractEvent;
 import org.bukkit.event.player.PlayerMoveEvent;
 import org.bukkit.inventory.EquipmentSlot;
 import org.bukkit.inventory.ItemStack;
 
+import java.util.HashSet;
 import java.util.Objects;
+import java.util.Set;
 
 /**
  * Applies kit characteristics (options) to duels.
@@ -150,14 +154,32 @@ public class KitOptionsListener implements Listener {
         event.setCancelled(true);
     }
     private class UHCListener implements Listener {
+        private final Set<Player> uhcPlayers = new HashSet<>();
         @EventHandler
         void on(MatchStartEvent event) {
             final ArenaImpl arena = arenaManager.get(event.getMatch().getArena().getName());
             if(arena == null) return;
             if(!isEnabled(arena,Characteristic.UHC)) return;
             for (final Player player : event.getPlayers()) {
+                uhcPlayers.add(player);
                 Objects.requireNonNull(player.getAttribute(Attribute.GENERIC_MAX_HEALTH)).setBaseValue(40.0);
                 player.setHealth(40.0);
+            }
+        }
+        @EventHandler
+        void on(MatchEndEvent event) {
+            final ArenaImpl arena = arenaManager.get(event.getMatch().getArena().getName());
+            if(arena == null) return;
+            if(!isEnabled(arena,Characteristic.UHC)) return;
+            for (final Player player : event.getMatch().getPlayers()) {
+                uhcPlayers.remove(player);
+                Objects.requireNonNull(player.getAttribute(Attribute.GENERIC_MAX_HEALTH)).setBaseValue(20.0);
+            }
+        }
+        @EventHandler
+        void on(FoodLevelChangeEvent event) {
+            if(event.getEntityType() == EntityType.PLAYER && uhcPlayers.contains((Player) event.getEntity())) {
+                event.setCancelled(true);
             }
         }
     }
