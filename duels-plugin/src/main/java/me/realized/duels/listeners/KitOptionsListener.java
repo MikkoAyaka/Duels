@@ -15,6 +15,7 @@ import me.realized.duels.util.metadata.MetadataUtil;
 import org.bukkit.Bukkit;
 import org.bukkit.Material;
 import org.bukkit.attribute.Attribute;
+import org.bukkit.attribute.AttributeModifier;
 import org.bukkit.block.Block;
 import org.bukkit.entity.EntityType;
 import org.bukkit.entity.Player;
@@ -34,6 +35,7 @@ import org.bukkit.inventory.ItemStack;
 import java.util.HashSet;
 import java.util.Objects;
 import java.util.Set;
+import java.util.UUID;
 
 /**
  * Applies kit characteristics (options) to duels.
@@ -155,6 +157,7 @@ public class KitOptionsListener implements Listener {
     }
     private class UHCListener implements Listener {
         private final Set<Player> uhcPlayers = new HashSet<>();
+        private final AttributeModifier modifier = new AttributeModifier("add-health",20, AttributeModifier.Operation.ADD_NUMBER);
         @EventHandler
         void on(MatchStartEvent event) {
             final ArenaImpl arena = arenaManager.get(event.getMatch().getArena().getName());
@@ -162,18 +165,22 @@ public class KitOptionsListener implements Listener {
             if(!isEnabled(arena,Characteristic.UHC)) return;
             for (final Player player : event.getPlayers()) {
                 uhcPlayers.add(player);
-                Objects.requireNonNull(player.getAttribute(Attribute.GENERIC_MAX_HEALTH)).setBaseValue(40.0);
+                Objects.requireNonNull(player.getAttribute(Attribute.GENERIC_MAX_HEALTH)).addModifier(modifier);
                 player.setHealth(40.0);
             }
         }
         @EventHandler
         void on(MatchEndEvent event) {
-            final ArenaImpl arena = arenaManager.get(event.getMatch().getArena().getName());
-            if(arena == null) return;
-            if(!isEnabled(arena,Characteristic.UHC)) return;
-            for (final Player player : event.getMatch().getPlayers()) {
-                uhcPlayers.remove(player);
-                Objects.requireNonNull(player.getAttribute(Attribute.GENERIC_MAX_HEALTH)).setBaseValue(20.0);
+            for (final Player player : event.getMatch().getStartingPlayers()) {
+                if(uhcPlayers.contains(player)) {
+                    uhcPlayers.remove(player);
+                    if(!player.isOnline())continue;
+                    Objects.requireNonNull(player.getAttribute(Attribute.GENERIC_MAX_HEALTH)).removeModifier(modifier);
+                    if(player.getMaxHealth() > 20.0) {
+                        player.setHealth(20.0);
+                        player.setMaxHealth(20.0);
+                    }
+                }
             }
         }
         @EventHandler
