@@ -3,10 +3,12 @@ package me.realized.duels.listeners;
 import me.realized.duels.DuelsPlugin;
 import me.realized.duels.api.event.match.MatchEndEvent;
 import me.realized.duels.api.event.match.MatchStartEvent;
+import me.realized.duels.api.kit.Kit;
 import me.realized.duels.arena.ArenaImpl;
 import me.realized.duels.arena.ArenaManagerImpl;
 import me.realized.duels.arena.MatchImpl;
 import me.realized.duels.config.Config;
+import me.realized.duels.kit.KitImpl;
 import me.realized.duels.kit.KitImpl.Characteristic;
 import me.realized.duels.util.PlayerUtil;
 import me.realized.duels.util.compat.CompatUtil;
@@ -17,25 +19,22 @@ import org.bukkit.Material;
 import org.bukkit.attribute.Attribute;
 import org.bukkit.attribute.AttributeModifier;
 import org.bukkit.block.Block;
+import org.bukkit.entity.Entity;
 import org.bukkit.entity.EntityType;
+import org.bukkit.entity.LivingEntity;
 import org.bukkit.entity.Player;
 import org.bukkit.event.Event.Result;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
-import org.bukkit.event.entity.EntityDamageByEntityEvent;
-import org.bukkit.event.entity.EntityDamageEvent;
-import org.bukkit.event.entity.EntityRegainHealthEvent;
+import org.bukkit.event.entity.*;
 import org.bukkit.event.entity.EntityRegainHealthEvent.RegainReason;
-import org.bukkit.event.entity.FoodLevelChangeEvent;
+import org.bukkit.event.inventory.InventoryEvent;
 import org.bukkit.event.player.PlayerInteractEvent;
 import org.bukkit.event.player.PlayerMoveEvent;
 import org.bukkit.inventory.EquipmentSlot;
 import org.bukkit.inventory.ItemStack;
 
-import java.util.HashSet;
-import java.util.Objects;
-import java.util.Set;
-import java.util.UUID;
+import java.util.*;
 
 /**
  * Applies kit characteristics (options) to duels.
@@ -54,6 +53,7 @@ public class KitOptionsListener implements Listener {
         this.arenaManager = plugin.getArenaManager();
 
         Bukkit.getPluginManager().registerEvents(new UHCListener(),plugin);
+        Bukkit.getPluginManager().registerEvents(new PotionListener(),plugin);
         Bukkit.getPluginManager().registerEvents(this, plugin);
         Bukkit.getPluginManager().registerEvents(CompatUtil.isPre1_14() ? new ComboPre1_14Listener() : new ComboPost1_14Listener(), plugin);
     }
@@ -154,6 +154,37 @@ public class KitOptionsListener implements Listener {
         }
 
         event.setCancelled(true);
+    }
+
+    private class PotionListener implements Listener {
+        private final Set<Player> potPlayers = new HashSet<>();
+        @EventHandler
+        void on(MatchStartEvent event) {
+            final ArenaImpl arena = arenaManager.get(event.getMatch().getArena().getName());
+            if(arena == null) return;
+            if(event.getMatch().getKit() == null) return;
+            if(!(event.getMatch().getKit().getName().equals("pot"))) return;
+            potPlayers.addAll(Arrays.asList(event.getPlayers()));
+        }
+        @EventHandler
+        void on(MatchEndEvent event) {
+            for (final Player player : event.getMatch().getStartingPlayers()) {
+                potPlayers.remove(player);
+            }
+        }
+        @EventHandler
+        void on(PotionSplashEvent event) {
+            if(event.getPotion().getShooter() instanceof Player) {
+                Player p = (Player) event.getPotion().getShooter();
+                if(potPlayers.contains(p)) {
+                    for (LivingEntity entity : event.getAffectedEntities()) {
+                        if(entity.getUniqueId() != p.getUniqueId()) {
+                            event.setIntensity(entity,0);
+                        }
+                    }
+                }
+            }
+        }
     }
     private class UHCListener implements Listener {
         private final Set<Player> uhcPlayers = new HashSet<>();
