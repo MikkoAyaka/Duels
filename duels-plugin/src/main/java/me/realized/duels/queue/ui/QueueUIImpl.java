@@ -15,19 +15,27 @@ public class QueueUIImpl implements QueueUI {
 
     Lang lang;
     Inventory menu;
+    List<DQueue> queues;
     public QueueUIImpl(Lang lang, List<DQueue> queues) {
         this.lang = lang;
-        menu = Bukkit.createInventory(null, 54, lang.getMessage("GUI.queue-menu.title"));
-        for(int i = 0;i < queues.size();i++) {
-            DQueue queue = queues.get(i);
-            Kit kit = queue.getKit();
-            if(kit == null) continue;
-            ItemStack is = kit.getDisplayed();
-            menu.setItem(i,is);
+        this.queues = queues;
+    }
+
+    private Inventory getMenu() {
+        if(menu == null) {
+            menu = Bukkit.createInventory(null, 54, lang.getMessage("GUI.queue-menu.title"));
+            for(int i = 0;i < queues.size();i++) {
+                DQueue queue = queues.get(i);
+                Kit kit = queue.getKit();
+                if(kit == null) continue;
+                ItemStack is = kit.getDisplayed();
+                menu.setItem(i,is);
+            }
         }
+        return menu;
     }
     @Override
     public void show(Player player) {
-        player.openInventory(menu);
+        player.openInventory(getMenu());
     }
 }

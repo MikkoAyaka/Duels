@@ -3,12 +3,8 @@ package me.realized.duels.queue.ui;
 import me.realized.duels.DuelsPlugin;
 import me.realized.duels.api.queue.ui.QueueUI;
 import me.realized.duels.api.queue.ui.QueueUIManager;
-import me.realized.duels.config.Lang;
 import me.realized.duels.queue.QueueManager;
-import me.realized.duels.util.Loadable;
 import org.bukkit.entity.Player;
-
-import java.io.File;
 
 public class QueueUIManagerImpl implements QueueUIManager {
     private final DuelsPlugin plugin;
