@@ -26,6 +26,7 @@ import org.bukkit.entity.Player;
 import org.bukkit.event.Event.Result;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
+import org.bukkit.event.block.BlockBreakEvent;
 import org.bukkit.event.entity.*;
 import org.bukkit.event.entity.EntityRegainHealthEvent.RegainReason;
 import org.bukkit.event.inventory.InventoryEvent;
@@ -193,23 +194,25 @@ public class KitOptionsListener implements Listener {
             final ArenaImpl arena = arenaManager.get(event.getMatch().getArena().getName());
             if(arena == null) return;
             if(!isEnabled(arena,Characteristic.UHC)) return;
-            for (final Player player : event.getPlayers()) {
-                uhcPlayers.add(player);
-            }
+            uhcPlayers.addAll(Arrays.asList(event.getPlayers()));
         }
         @EventHandler
         void on(MatchEndEvent event) {
             for (final Player player : event.getMatch().getStartingPlayers()) {
-                if(uhcPlayers.contains(player)) {
-                    uhcPlayers.remove(player);
-                    if(!player.isOnline())continue;
-                }
+                uhcPlayers.remove(player);
             }
         }
         @EventHandler
         void on(FoodLevelChangeEvent event) {
             if(event.getEntityType() == EntityType.PLAYER && uhcPlayers.contains((Player) event.getEntity())) {
                 event.setCancelled(true);
+            }
+        }
+        // stop player breaking the floor
+        @EventHandler
+        void on(BlockBreakEvent event) {
+            if(uhcPlayers.contains(event.getPlayer())) {
+                if(event.getBlock().getY() <= 100)event.setCancelled(true);
             }
         }
     }
