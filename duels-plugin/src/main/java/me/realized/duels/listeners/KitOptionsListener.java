@@ -57,6 +57,7 @@ public class KitOptionsListener implements Listener {
         Bukkit.getPluginManager().registerEvents(new UHCListener(),plugin);
         Bukkit.getPluginManager().registerEvents(new PotionListener(),plugin);
         Bukkit.getPluginManager().registerEvents(new EnderPearlListener(),plugin);
+        Bukkit.getPluginManager().registerEvents(new FoodlevelListener(),plugin);
         Bukkit.getPluginManager().registerEvents(this, plugin);
         Bukkit.getPluginManager().registerEvents(CompatUtil.isPre1_14() ? new ComboPre1_14Listener() : new ComboPost1_14Listener(), plugin);
     }
@@ -199,6 +200,27 @@ public class KitOptionsListener implements Listener {
             }
         }
     }
+    private class FoodlevelListener implements Listener {
+        private final Set<Player> potPlayers = new HashSet<>();
+        @EventHandler
+        void on(FoodLevelChangeEvent event) {
+            if(event.getEntityType() != EntityType.PLAYER)return;
+            if(potPlayers.contains((Player) event.getEntity()))return;
+            event.setCancelled(true);
+        }
+        @EventHandler
+        void on(MatchStartEvent event) {
+            if(event.getMatch().getKit() == null)return;
+            if(!event.getMatch().getKit().getName().equals("pot"))return;
+            potPlayers.addAll(Arrays.asList(event.getPlayers()));
+        }
+        @EventHandler
+        void on(MatchEndEvent event) {
+            for (final Player player : event.getMatch().getStartingPlayers()) {
+                potPlayers.remove(player);
+            }
+        }
+    }
     private class UHCListener implements Listener {
         private final Set<Player> uhcPlayers = new HashSet<>();
         @EventHandler
@@ -212,12 +234,6 @@ public class KitOptionsListener implements Listener {
         void on(MatchEndEvent event) {
             for (final Player player : event.getMatch().getStartingPlayers()) {
                 uhcPlayers.remove(player);
-            }
-        }
-        @EventHandler
-        void on(FoodLevelChangeEvent event) {
-            if(event.getEntityType() == EntityType.PLAYER && uhcPlayers.contains((Player) event.getEntity())) {
-                event.setCancelled(true);
             }
         }
         // stop player breaking the floor
