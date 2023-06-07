@@ -188,7 +188,6 @@ public class KitOptionsListener implements Listener {
     }
     private class UHCListener implements Listener {
         private final Set<Player> uhcPlayers = new HashSet<>();
-        private final AttributeModifier modifier = new AttributeModifier("add-health",20, AttributeModifier.Operation.ADD_NUMBER);
         @EventHandler
         void on(MatchStartEvent event) {
             final ArenaImpl arena = arenaManager.get(event.getMatch().getArena().getName());
@@ -196,8 +195,6 @@ public class KitOptionsListener implements Listener {
             if(!isEnabled(arena,Characteristic.UHC)) return;
             for (final Player player : event.getPlayers()) {
                 uhcPlayers.add(player);
-                Objects.requireNonNull(player.getAttribute(Attribute.GENERIC_MAX_HEALTH)).addModifier(modifier);
-                player.setHealth(40.0);
             }
         }
         @EventHandler
@@ -206,11 +203,6 @@ public class KitOptionsListener implements Listener {
                 if(uhcPlayers.contains(player)) {
                     uhcPlayers.remove(player);
                     if(!player.isOnline())continue;
-                    Objects.requireNonNull(player.getAttribute(Attribute.GENERIC_MAX_HEALTH)).removeModifier(modifier);
-                    if(player.getMaxHealth() > 20.0) {
-                        player.setHealth(20.0);
-                        player.setMaxHealth(20.0);
-                    }
                 }
             }
         }
