@@ -32,6 +32,7 @@ import org.bukkit.event.entity.EntityRegainHealthEvent.RegainReason;
 import org.bukkit.event.inventory.InventoryEvent;
 import org.bukkit.event.player.PlayerInteractEvent;
 import org.bukkit.event.player.PlayerMoveEvent;
+import org.bukkit.event.player.PlayerTeleportEvent;
 import org.bukkit.inventory.EquipmentSlot;
 import org.bukkit.inventory.ItemStack;
 
@@ -55,6 +56,7 @@ public class KitOptionsListener implements Listener {
 
         Bukkit.getPluginManager().registerEvents(new UHCListener(),plugin);
         Bukkit.getPluginManager().registerEvents(new PotionListener(),plugin);
+        Bukkit.getPluginManager().registerEvents(new EnderPearlListener(),plugin);
         Bukkit.getPluginManager().registerEvents(this, plugin);
         Bukkit.getPluginManager().registerEvents(CompatUtil.isPre1_14() ? new ComboPre1_14Listener() : new ComboPost1_14Listener(), plugin);
     }
@@ -157,6 +159,16 @@ public class KitOptionsListener implements Listener {
         event.setCancelled(true);
     }
 
+    // prevent ender pearl teleport too far
+    private class EnderPearlListener implements Listener {
+        @EventHandler
+        void on(PlayerTeleportEvent event) {
+            if(event.getCause().equals(PlayerTeleportEvent.TeleportCause.ENDER_PEARL)) {
+                if(event.getTo() == null)return;
+                if(event.getFrom().distance(event.getTo()) > 50)event.setCancelled(true);
+            }
+        }
+    }
     private class PotionListener implements Listener {
         private final Set<Player> potPlayers = new HashSet<>();
         @EventHandler
