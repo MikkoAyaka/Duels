@@ -12,6 +12,6 @@ public class UICommand extends BaseCommand {
     }
     @Override
     protected void execute(CommandSender sender, String label, String[] args) {
-        queueUIManager.showUI((Player) sender);
+//        queueUIManager.showUI((Player) sender);
     }
 }

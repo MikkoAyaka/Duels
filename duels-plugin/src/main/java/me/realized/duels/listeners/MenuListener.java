@@ -2,13 +2,13 @@ package me.realized.duels.listeners;
 
 import me.realized.duels.DuelsPlugin;
 import org.bukkit.Material;
-import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
-import org.bukkit.event.inventory.InventoryMoveItemEvent;
+import org.bukkit.event.block.Action;
 import org.bukkit.event.player.PlayerDropItemEvent;
 import org.bukkit.event.player.PlayerInteractEvent;
 import org.bukkit.event.player.PlayerJoinEvent;
+import org.bukkit.inventory.ItemFlag;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
 
@@ -31,6 +31,7 @@ public class MenuListener implements Listener {
         lores.add("§7");
         meta.setLore(lores);
         meta.setUnbreakable(true);
+        meta.addItemFlags(ItemFlag.HIDE_ATTRIBUTES);
         menuItem.setItemMeta(meta);
     }
     @EventHandler
@@ -42,24 +43,23 @@ public class MenuListener implements Listener {
     @EventHandler
     void on(PlayerDropItemEvent event) {
         ItemStack droppedItem = event.getItemDrop().getItemStack();
-        if(droppedItem.getItemMeta() != null && droppedItem.getItemMeta().getDisplayName().equals(Objects.requireNonNull(menuItem.getItemMeta()).getDisplayName())) {
+        if(droppedItem.getItemMeta() == null)return;
+        if(!droppedItem.getItemMeta().hasDisplayName())return;
+        if(droppedItem.getItemMeta().getDisplayName().equals(Objects.requireNonNull(menuItem.getItemMeta()).getDisplayName())) {
             event.setCancelled(true);
         }
     }
     @EventHandler
     void on(PlayerInteractEvent event) {
-        ItemStack item = event.getItem();
-        if(item == null)return;
-        if(item.getItemMeta() == null)return;
-        if(item.getItemMeta().getDisplayName().equals(Objects.requireNonNull(menuItem.getItemMeta()).getDisplayName())) {
-            DuelsPlugin.getInstance().getQueueUIManager().showUI(event.getPlayer());
-        }
-    }
-    @EventHandler
-    void on(InventoryMoveItemEvent event) {
-        ItemStack droppedItem = event.getItem();
-        if(droppedItem.getItemMeta() != null && droppedItem.getItemMeta().getDisplayName().equals(Objects.requireNonNull(menuItem.getItemMeta()).getDisplayName())) {
-            event.setCancelled(true);
+        if(event.getAction().equals(Action.RIGHT_CLICK_AIR) || event.getAction().equals(Action.RIGHT_CLICK_BLOCK)) {
+            ItemStack item = event.getItem();
+            if(item == null)return;
+            if(item.getItemMeta() == null)return;
+            if(!item.getItemMeta().hasDisplayName())return;
+            if(item.getItemMeta().getDisplayName().equals(Objects.requireNonNull(menuItem.getItemMeta()).getDisplayName())) {
+//            DuelsPlugin.getInstance().getQueueUIManager().showUI(event.getPlayer());
+                DuelsPlugin.getInstance().getQueueManager().getGui().open(event.getPlayer());
+            }
         }
     }
 }
