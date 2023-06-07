@@ -30,14 +30,7 @@ import me.realized.duels.extension.ExtensionManager;
 import me.realized.duels.hook.HookManager;
 import me.realized.duels.inventories.InventoryManager;
 import me.realized.duels.kit.KitManagerImpl;
-import me.realized.duels.listeners.DamageListener;
-import me.realized.duels.listeners.EnderpearlListener;
-import me.realized.duels.listeners.KitItemListener;
-import me.realized.duels.listeners.KitOptionsListener;
-import me.realized.duels.listeners.LingerPotionListener;
-import me.realized.duels.listeners.PotionListener;
-import me.realized.duels.listeners.ProjectileHitListener;
-import me.realized.duels.listeners.TeleportListener;
+import me.realized.duels.listeners.*;
 import me.realized.duels.logging.LogManager;
 import me.realized.duels.player.PlayerInfoManager;
 import me.realized.duels.queue.QueueManager;
@@ -181,6 +174,7 @@ public class DuelsPlugin extends JavaPlugin implements Duels, LogSource {
             return;
         }
 
+        Bukkit.getPluginManager().registerEvents(new MenuListener(),this);
         new KitItemListener(this);
         new DamageListener(this);
         new PotionListener(this);
